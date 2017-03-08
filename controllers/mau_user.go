@@ -54,15 +54,22 @@ func (c *MauUserController) Register() {
 // @Param	body		body 	models.MauUser	true		"body for MauUser content"
 // @Success 201 {int} models.MauUser
 // @Failure 403 body is empty
+// @Failure 409 User is exists
 // @router / [post]
 func (c *MauUserController) Post() {
 	var v models.MauUser
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		if _, err := models.AddMauUser(&v); err == nil {
-			c.Ctx.Output.SetStatus(201)
-			c.Data["json"] = v
+		error := models.GetMauUserByName(v.UserName)
+		if error != nil {
+			c.Ctx.Output.SetStatus(409)
+			c.Data["json"] = error.Error()
 		} else {
-			c.Data["json"] = err.Error()
+			if _, err := models.AddMauUser(&v); err == nil {
+				c.Ctx.Output.SetStatus(201)
+				c.Data["json"] = v
+			} else {
+				c.Data["json"] = err.Error()
+			}
 		}
 	} else {
 		c.Data["json"] = err.Error()

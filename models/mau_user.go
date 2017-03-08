@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-
+	
 	"github.com/astaxie/beego/orm"
 )
 
@@ -42,6 +42,17 @@ func GetMauUserById(id int) (v *MauUser, err error) {
 		return v, nil
 	}
 	return nil, err
+}
+
+// GetMauUserByName retrieves MauUser by UserName. Returns error if
+// UserName exist
+func GetMauUserByName(username string) (err error) {
+	o := orm.NewOrm()
+	v := MauUser{UserName: username}
+	if err = o.Read(&v, "UserName"); err == nil {
+		return errors.New("User is exists")
+	}
+	return nil
 }
 
 // GetAllMauUser retrieves all MauUser matches certain condition. Returns empty list if
